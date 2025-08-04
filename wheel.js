@@ -227,3 +227,38 @@ function ensureUserID(){
 ensureUserID();
 buildWheel();
 updateDisplay();
+// Get stored history array (persisted)
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem("completedHistory") || "[]");
+  } catch {
+    return [];
+  }
+}
+function addHistoryEntry(entry) {
+  const hist = getHistory();
+  hist.unshift(entry); // newest first
+  // keep last 20 if chahe to limit
+  localStorage.setItem("completedHistory", JSON.stringify(hist.slice(0, 50)));
+  renderHistory();
+}
+function renderHistory() {
+  const container = document.getElementById("historyList");
+  if (!container) return;
+  const hist = getHistory();
+  if (hist.length === 0) {
+    container.innerHTML = "<div class='small'>Koi record nahi mila.</div>";
+    return;
+  }
+  container.innerHTML = hist.map(e => {
+    return `
+      <div style="background:rgba(255,255,255,0.08); padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; gap:6px; font-size:12px;">
+        <div>
+          <div><strong>₹${e.amount.toFixed(2)}</strong> completed</div>
+          <div class="small">${new Date(e.time).toLocaleString('en-IN')}</div>
+        </div>
+        <div style="align-self:center;">ID: ${e.userID || "-"}</div>
+      </div>
+    `;
+  }).join("");
+}
